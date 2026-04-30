@@ -3,8 +3,8 @@ import redis.asyncio as redis
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from temporalio.client import Client
-from orchestrator.executor.dag_workflow import KinSequentialWorkflow
-from models.schemas import DAGSpec, TaskNode, TaskResult
+from kin.orchestrator.executor.dag_workflow import KinSequentialWorkflow
+from kin.models.schemas import DAGSpec, TaskNode, TaskResult
 
 app = FastAPI(title="Kin AI Gateway")
 

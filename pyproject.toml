@@ -26,13 +26,15 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["agents", "models", "gateway", "orchestrator", "bus", "infra", "tools"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
 
 [project.scripts]
-kin = "cli:main"
+kin = "kin.cli:main"
 
-# Note: Keeping dev dependencies in [tool.uv] is fine if you only use uv,
-# but the standard "Group" way is below if you want it to be ultra-clean:
 [dependency-groups]
 dev = [
     "pytest",

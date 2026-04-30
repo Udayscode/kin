@@ -1,6 +1,6 @@
 from datetime import timedelta
 from temporalio import workflow
-from models.schemas import DAGSpec, TaskResult
+from kin.models.schemas import DAGSpec, TaskResult
 
 @workflow.defn
 class KinSequentialWorkflow:

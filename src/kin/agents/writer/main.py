@@ -2,8 +2,8 @@ import asyncio
 import os
 import google.generativeai as genai
 from groq import Groq
-from agents.base.agent import BaseAgent
-from models.schemas import TaskMessage
+from kin.agents.base.agent import BaseAgent
+from kin.models.schemas import TaskMessage
 from dotenv import load_dotenv
 
 class WriterAgent(BaseAgent):

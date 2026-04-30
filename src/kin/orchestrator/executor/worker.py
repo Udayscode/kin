@@ -4,8 +4,8 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 from temporalio.contrib.pydantic import pydantic_data_converter
 
-from orchestrator.executor.dag_workflow import KinSequentialWorkflow
-from orchestrator.executor.activities import AgentActivities
+from kin.orchestrator.executor.dag_workflow import KinSequentialWorkflow
+from kin.orchestrator.executor.activities import AgentActivities
 
 
 async def main():

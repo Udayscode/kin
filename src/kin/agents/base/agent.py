@@ -1,8 +1,8 @@
 import asyncio
 import logging
 from abc import ABC, abstractmethod
-from models.schemas import TaskMessage, TaskResult, NodeState
-from bus.streams import KinBus
+from kin.models.schemas import TaskMessage, TaskResult, NodeState
+from kin.bus.streams import KinBus
 
 logger = logging.getLogger(__name__)
 

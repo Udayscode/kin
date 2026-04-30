@@ -3,8 +3,8 @@ import os
 import google.generativeai as genai
 from groq import Groq
 from ddgs import DDGS
-from agents.base.agent import BaseAgent
-from models.schemas import TaskMessage
+from kin.agents.base.agent import BaseAgent
+from kin.models.schemas import TaskMessage
 from dotenv import load_dotenv
 
 def web_search(query: str, max_results: int = 3):

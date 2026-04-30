@@ -1,6 +1,6 @@
 from temporalio import activity
 from bus.streams import KinBus
-from models.schemas import TaskNode, TaskMessage, TaskResult
+from kin.models.schemas import TaskNode, TaskMessage, TaskResult
 
 import uuid
 import time
