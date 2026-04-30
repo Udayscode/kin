@@ -30,7 +30,7 @@ jobs:
           uv run flake8 . --exclude .venv,migrations --ignore E501,F401
 
       - name: Verify CLI Entrypoint
-        run: uv run kin --help
+        run: uv run --package kin kin --help
 
       - name: Run Orchestrator Logic Tests (Bypassed)
         run: uv run pytest || echo "Tests bypassed for now"
