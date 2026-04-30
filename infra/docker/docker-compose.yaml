@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: uday
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: kin
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+  temporal:
+    container_name: temporal
+    image: temporalio/admin-tools:latest
+    network_mode: host
+    entrypoint: ["/bin/sh", "-c", "temporal server start-dev --ip 0.0.0.0"]

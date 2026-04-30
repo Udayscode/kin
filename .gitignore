@@ -1,0 +1,20 @@
+# Environments & Secrets
+.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Project Specific
+kin.egg-info/
+uv.lock
+.python-version
+
+# Database & Migrations
+*.db
+versions/
+
+# IDEs
+.vscode/
+.idea/
