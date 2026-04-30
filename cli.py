@@ -94,5 +94,8 @@ def poll(workflow_id: str):
                 live.update(f"[yellow]RECONNECTING... ({str(e)})[/yellow]")
                 time.sleep(2)
 
+def main():
+    app()
+
 if __name__ == "__main__":
     app()
