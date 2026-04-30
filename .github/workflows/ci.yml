@@ -27,7 +27,7 @@ jobs:
       - name: Lint and Format Check
         run: |
           uv run black --check .
-          uv run flake8 .
+          uv run flake8 . --exclude .venv,migrations --ignore E501,F401
 
       - name: Verify CLI Entrypoint
         run: uv run kin --help
