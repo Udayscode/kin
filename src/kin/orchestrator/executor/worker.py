@@ -10,8 +10,7 @@ from kin.orchestrator.executor.activities import AgentActivities
 
 async def main():
     client = await Client.connect(
-        "localhost:7233",
-        data_converter=pydantic_data_converter
+        "localhost:7233", data_converter=pydantic_data_converter
     )
 
     activities = AgentActivities()

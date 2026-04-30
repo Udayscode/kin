@@ -8,20 +8,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 async def run_agent():
     r = redis.Redis(host="localhost", port=6379, decode_responses=True)
     agent = ResearcherAgent(api_key=os.getenv("GROQ_API_KEY"))
-    
-    print(f"[Agent Runner] Starting agent and listening for '{agent.agent_type}' tasks...")
 
-    last_id = "$"   # only new tasks from now
+    print(
+        f"[Agent Runner] Starting agent and listening for '{agent.agent_type}' tasks..."
+    )
+
+    last_id = "$"  # only new tasks from now
 
     while True:
-        streams = await r.xread(
-            {"agent_pool": last_id},
-            count=1,
-            block=0
-        )
+        streams = await r.xread({"agent_pool": last_id}, count=1, block=0)
 
         for _, messages in streams:
             for msg_id, data in messages:
@@ -38,15 +37,16 @@ async def run_agent():
                         workflow_id=task_data.workflow_id,
                         node_id=task_data.node_id,
                         status="COMPLETED",
-                        output=result_data.get("data", result_data)
+                        output=result_data.get("data", result_data),
                     )
 
                     await r.xadd(
                         f"results:{task_data.workflow_id}",
-                        {"data": res.model_dump_json()}
+                        {"data": res.model_dump_json()},
                     )
 
                     print(f"Task {task_data.msg_id} completed.")
+
 
 if __name__ == "__main__":
     asyncio.run(run_agent())

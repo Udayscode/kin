@@ -8,7 +8,6 @@ env/
 
 # Project Specific
 kin.egg-info/
-uv.lock
 .python-version
 
 # Database & Migrations

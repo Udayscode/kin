@@ -4,9 +4,10 @@ from temporalio.worker import Worker
 from orchestrator.executor.dag_workflow import KinWorkflow
 from orchestrator.executor.activities import KinActivities
 
+
 async def main():
     client = await Client.connect("localhost:7233")
-    
+
     acts = KinActivities()
 
     worker = Worker(
@@ -15,8 +16,9 @@ async def main():
         workflows=[KinWorkflow],
         activities=[acts.dispatch_task],
     )
-    
+
     await worker.run()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

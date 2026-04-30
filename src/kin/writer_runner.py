@@ -8,21 +8,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 async def run_agent():
     r = redis.Redis(host="localhost", port=6379, decode_responses=True)
     agent = WriterAgent(api_key=os.getenv("GROQ_API_KEY"))
-    
-    print(f"[Agent Runner] Starting agent and listening for '{agent.agent_type}' tasks...")
+
+    print(
+        f"[Agent Runner] Starting agent and listening for '{agent.agent_type}' tasks..."
+    )
 
     last_id = "$"
 
     while True:
         # read from pool
-        streams = await r.xread(
-            {"agent_pool": last_id}, 
-            count=1, 
-            block=0
-        )
+        streams = await r.xread({"agent_pool": last_id}, count=1, block=0)
 
         for _, messages in streams:
             for msg_id, data in messages:
@@ -41,15 +40,19 @@ async def run_agent():
                         workflow_id=task_data.workflow_id,
                         node_id=task_data.node_id,
                         status="COMPLETED",
-                        output=result_data.get("summary", result_data)
+                        output=result_data.get("summary", result_data),
                     )
 
                     # publish result to workflow stream
-                    await r.xadd(f"results:{task_data.workflow_id}", {"data": res.model_dump_json()})
-                    
+                    await r.xadd(
+                        f"results:{task_data.workflow_id}",
+                        {"data": res.model_dump_json()},
+                    )
+
                     # acknowledge/cleanup the processed message
                     await r.xdel("agent_pool", msg_id)
                     print(f"Task {task_data.msg_id} completed and result published.")
+
 
 if __name__ == "__main__":
     asyncio.run(run_agent())

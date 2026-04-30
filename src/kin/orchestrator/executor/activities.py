@@ -19,7 +19,7 @@ class AgentActivities:
         node = TaskNode(
             id=task.node_id,
             agent_type="researcher",
-            task_description=task.task_description
+            task_description=task.task_description,
         )
 
         return await self.dispatch_task(node, task.workflow_id)
@@ -30,9 +30,7 @@ class AgentActivities:
     @activity.defn(name="writer_activity")
     async def writer_activity(self, task: TaskMessage) -> dict:
         node = TaskNode(
-            id=task.node_id,
-            agent_type="writer",
-            task_description=task.task_description
+            id=task.node_id, agent_type="writer", task_description=task.task_description
         )
 
         return await self.dispatch_task(node, task.workflow_id)
@@ -58,7 +56,7 @@ class AgentActivities:
                 workflow_id=clean_wf_id,
                 node_id=node.id,
                 agent_type=node.agent_type,
-                task_description=node.task_description
+                task_description=node.task_description,
             )
 
             await self.bus.send_task(msg)
@@ -77,9 +75,7 @@ class AgentActivities:
                 activity.heartbeat(f"Waiting for node {node.id}")
 
                 entries = await self.bus.client.xread(
-                    {stream_key: last_id},
-                    count=1,
-                    block=3000
+                    {stream_key: last_id}, count=1, block=3000
                 )
 
                 if entries:
@@ -87,9 +83,7 @@ class AgentActivities:
                         for msg_id, data in messages:
                             last_id = msg_id
 
-                            result = TaskResult.model_validate_json(
-                                data["data"]
-                            )
+                            result = TaskResult.model_validate_json(data["data"])
 
                             if result.node_id == node.id:
                                 if result.status == "FAILED":
@@ -98,7 +92,7 @@ class AgentActivities:
                                 return {
                                     "node_id": node.id,
                                     "agent_type": node.agent_type,
-                                    "data": result.output
+                                    "data": result.output,
                                 }
 
             except asyncio.CancelledError:
@@ -113,6 +107,4 @@ class AgentActivities:
                 )
                 await asyncio.sleep(1)
 
-        raise TimeoutError(
-            f"Node {node.id} timed out after 120 seconds"
-        )
+        raise TimeoutError(f"Node {node.id} timed out after 120 seconds")
