@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 # 1. Load env and Kin models
 load_dotenv()
-from models.database import Base
+from kin.models.database import Base
 
 config = context.config
 

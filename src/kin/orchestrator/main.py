@@ -1,8 +1,8 @@
 import asyncio
 from temporalio.client import Client
 from temporalio.worker import Worker
-from orchestrator.executor.dag_workflow import KinWorkflow
-from orchestrator.executor.activities import KinActivities
+from kin.orchestrator.executor.dag_workflow import KinWorkflow
+from kin.orchestrator.executor.activities import KinActivities
 
 
 async def main():

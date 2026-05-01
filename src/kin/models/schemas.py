@@ -16,12 +16,16 @@ class TaskNode(BaseModel):
     agent_type: str
     task_description: str
     input_from: List[str] = []
+    dependencies: List[str] = []
+    input_from: List[str] = []
     dependencies: list[str] = []
 
 
 class DAGSpec(BaseModel):
     workflow_id: UUID = Field(default_factory=uuid4)
     nodes: List[TaskNode]
+    entry_nodes: List[str] = []
+    exit_nodes: List[str] = []
 
 
 class TaskMessage(BaseModel):

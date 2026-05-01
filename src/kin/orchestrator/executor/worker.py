@@ -4,7 +4,7 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 from temporalio.contrib.pydantic import pydantic_data_converter
 
-from kin.orchestrator.executor.dag_workflow import KinSequentialWorkflow
+from kin.orchestrator.executor.dag_workflow import KinDAGWorkflow
 from kin.orchestrator.executor.activities import AgentActivities
 
 
@@ -18,7 +18,7 @@ async def main():
     worker = Worker(
         client,
         task_queue="kin-task-queue",
-        workflows=[KinSequentialWorkflow],
+        workflows=[KinDAGWorkflow],
         activities=[
             activities.dispatch_task,
             activities.research_activity,
