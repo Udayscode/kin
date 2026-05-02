@@ -40,13 +40,14 @@ class WriterAgent(BaseAgent):
             )
 
             return {
+                "agent_type": "writer",
                 "output_file": "report.md",
                 "markdown": response.choices[0].message.content,
                 "status": "success",
             }
         except Exception as e:
             print(f"Writer Gemini Error: {e}")
-            return {"markdown": f"Error: {str(e)}", "status": "failed"}
+            return {"agent_type": "writer", "markdown": f"Error: {str(e)}", "status": "failed"}
 
 
 if __name__ == "__main__":

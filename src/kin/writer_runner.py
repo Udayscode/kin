@@ -37,10 +37,9 @@ async def run_agent():
 
                     # construct result
                     res = TaskResult(
-                        workflow_id=task_data.workflow_id,
                         node_id=task_data.node_id,
                         status="COMPLETED",
-                        output=result_data.get("summary", result_data),
+                        output=result_data,
                     )
 
                     # publish result to workflow stream

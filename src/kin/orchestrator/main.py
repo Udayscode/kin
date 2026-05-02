@@ -1,22 +1,32 @@
 import asyncio
+
 from temporalio.client import Client
 from temporalio.worker import Worker
-from kin.orchestrator.executor.dag_workflow import KinWorkflow
-from kin.orchestrator.executor.activities import KinActivities
+from temporalio.contrib.pydantic import pydantic_data_converter
+
+from kin.orchestrator.executor.dag_workflow import KinDAGWorkflow
+from kin.orchestrator.executor.activities import AgentActivities
 
 
 async def main():
-    client = await Client.connect("localhost:7233")
+    client = await Client.connect(
+        "localhost:7233", data_converter=pydantic_data_converter
+    )
 
-    acts = KinActivities()
+    activities = AgentActivities()
 
     worker = Worker(
         client,
-        task_queue="kin-tasks",
-        workflows=[KinWorkflow],
-        activities=[acts.dispatch_task],
+        task_queue="kin-task-queue",
+        workflows=[KinDAGWorkflow],
+        activities=[
+            activities.dispatch_task,
+            activities.research_activity,
+            activities.writer_activity,
+        ],
     )
 
+    print("Worker started...")
     await worker.run()
 
 

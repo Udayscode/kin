@@ -57,7 +57,7 @@ class BaseAgent(ABC):
     async def _handle_wrapper(self, msg_id: str, data: dict):
         async with self.semaphore:
             try:
-                task = TaskMessage.model_validata_json(data["data"])
+                task = TaskMessage.model_validate_json(data["data"])
                 output = await self.process(task)
 
                 result = TaskResult(
@@ -71,8 +71,8 @@ class BaseAgent(ABC):
                     error=str(e),
                 )
 
-                # Sequence: 1. Send Result -> 2. ACK message
-                await self.bus.send_result(result, result.node_id)
-                await self.bus.client.xack(
-                    f"tasks:{self.agent_type}", self.group, msg_id
-                )
+            # Sequence: 1. Send Result -> 2. ACK message
+            await self.bus.send_result(result, result.node_id)
+            await self.bus.client.xack(
+                f"tasks:{self.agent_type}", self.group, msg_id
+            )

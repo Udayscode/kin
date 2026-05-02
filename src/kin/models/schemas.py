@@ -16,9 +16,9 @@ class TaskNode(BaseModel):
     agent_type: str
     task_description: str
     input_from: List[str] = []
-    dependencies: List[str] = []
-    input_from: List[str] = []
     dependencies: list[str] = []
+    timeout_sec: int = 120
+    max_retries: int = 2
 
 
 class DAGSpec(BaseModel):

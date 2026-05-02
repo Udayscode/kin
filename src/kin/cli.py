@@ -27,7 +27,7 @@ def get_status_color(status: str) -> str:
 def submit(prompt: str = typer.Argument(..., help="Workflow input prompt")):
     """Submit a task and transition to tracking."""
     try:
-        response = httpx.post(f"{API_URL}/workflows", json={"prompt": prompt})
+        response = httpx.post(f"{API_URL}/workflows", json={"prompt": prompt}, timeout=30.0)
         response.raise_for_status()
         workflow_id = response.json()["workflow_id"]
         console.print(
@@ -79,9 +79,11 @@ def poll(workflow_id: str):
                         f"\n[bold green]✔[/bold green] [bold]EXECUTION_FINISHED[/bold] | Status: {overall_status}\n"
                     )
 
-                    # Target the specific writer output
-                    writer_node = results.get("writer_01", {})
-                    # Adjusting to your specific JSON structure: data -> markdown
+                    # Find the writer node dynamically
+                    writer_node = next(
+                        (v for v in results.values() if v.get("agent_type") == "writer"),
+                        None,
+                    ) or next(iter(results.values()), {})
                     raw_content = writer_node.get("data", {})
                     markdown_body = (
                         raw_content.get("markdown")

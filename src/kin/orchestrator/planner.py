@@ -3,104 +3,97 @@ from groq import Groq
 from kin.models.schemas import DAGSpec, TaskNode
 import os
 
-
 SYSTEM_PROMPT = """
 You are a workflow planner for an AI agent platform called Kin.
 Available agent types: "researcher", "writer"
 
-Given a user task, decompose it into a DAG of sub-tasks.
+Decompose the user task into a DAG of nodes.
 Rules:
-- researcher: fetches and synthesizes information
-- writer: formats/structures content into final output
-- writer must always depend on researcher output
+- Use "researcher" to gather information
+- Use "writer" to produce final output from research
 - input_from: list of node IDs whose output this node needs
-- dependencies: same values as input_from
-- entry_nodes: node IDs with no dependencies
-- exit_nodes: node IDs with no dependents
+- Nodes with empty input_from run first (in parallel if multiple)
+- Output ONLY valid JSON, no prose, no markdown fences
 
-Return ONLY valid JSON. No prose. No markdown fences.
-
-Example output:
+JSON format:
 {
   "nodes": [
     {
-      "id": "research_01",
-      "agent_type": "researcher",
-      "task_description": "...",
-      "input_from": [],
-      "dependencies": [],
-      "timeout_sec": 120,
-      "max_retries": 2
+        "id": "n1",
+        "agent_type": "researcher",
+        "task_description": "...",
+        "input_from": []
     },
     {
-      "id": "writer_01",
-      "agent_type": "writer",
-      "task_description": "...",
-      "input_from": ["research_01"],
-      "dependencies": ["research_01"],
-      "timeout_sec": 120,
-      "max_retries": 2
+        "id": "n2",
+        "agent_type": "writer",
+        "task_description": "...",
+        "input_from": ["n1"]
     }
-  ],
-  "entry_nodes": ["research_01"],
-  "exit_nodes": ["writer_01"]
+  ]
 }
 """
 
+
 class Planner:
-    def __init__(self):
-        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    def __init__(self, api_key: str):
+        self.client = Groq(api_key=api_key)
 
     def plan(self, task: str) -> DAGSpec:
         response = self.client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f"Task: {task}"}
+                {"role": "user", "content": f"Task: {task}"},
             ],
-            temperature=0.1,   # low temp — we want deterministic structure
+            temperature=0.2,  # low temp = more deterministic JSON
             max_tokens=1024,
         )
 
         raw = response.choices[0].message.content.strip()
 
-        # Strip markdown fences if model disobeys
+        # strip markdown fences if model ignores instructions
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):
                 raw = raw[4:]
-        raw = raw.strip()
 
         data = json.loads(raw)
-        dag = DAGSpec(**data)
+        nodes = [TaskNode(**n) for n in data["nodes"]]
+
+        # auto-compute entry/exit nodes
+        all_deps = {dep for n in nodes for dep in n.input_from}
+
+        dag = DAGSpec(
+            nodes=nodes,
+            entry_nodes=[n.id for n in nodes if not n.input_from],
+            exit_nodes=[n.id for n in nodes if n.id not in all_deps],
+        )
+
         self._validate(dag)
         return dag
 
     def _validate(self, dag: DAGSpec):
-        node_ids = {n.id for n in dag.nodes}
-
-        # All dependency references must point to real nodes
+        ids = {n.id for n in dag.nodes}
         for node in dag.nodes:
-            for dep in node.dependencies:
-                if dep not in node_ids:
-                    raise ValueError(f"Node {node.id} has unknown dependency: {dep}")
+            for dep in node.input_from:
+                if dep not in ids:
+                    raise ValueError(f"Node {node.id} references unknown dep: {dep}")
+        # cycle check via DFS
+        adj = {n.id: n.input_from for n in dag.nodes}
+        visited, stack = set(), set()
 
-        # Cycle detection (DFS)
-        adj = {n.id: n.dependencies for n in dag.nodes}
-        visited, rec = set(), set()
-
-        def dfs(nid):
-            visited.add(nid)
-            rec.add(nid)
-            for dep in adj.get(nid, []):
+        def dfs(n):
+            visited.add(n)
+            stack.add(n)
+            for dep in adj.get(n, []):
                 if dep not in visited and dfs(dep):
                     return True
-                if dep in rec:
+                if dep in stack:
                     return True
-            rec.discard(nid)
+            stack.discard(n)
             return False
 
-        for nid in node_ids:
-            if nid not in visited:
-                if dfs(nid):
-                    raise ValueError(f"Cycle detected in DAG")
+        for n in ids:
+            if n not in visited and dfs(n):
+                raise ValueError("Cycle detected in DAG")
