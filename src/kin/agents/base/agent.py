@@ -73,6 +73,4 @@ class BaseAgent(ABC):
 
             # Sequence: 1. Send Result -> 2. ACK message
             await self.bus.send_result(result, result.node_id)
-            await self.bus.client.xack(
-                f"tasks:{self.agent_type}", self.group, msg_id
-            )
+            await self.bus.client.xack(f"tasks:{self.agent_type}", self.group, msg_id)

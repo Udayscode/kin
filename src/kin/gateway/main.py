@@ -1,8 +1,6 @@
 import os
 import redis.asyncio as redis
 from dotenv import load_dotenv
-
-load_dotenv()
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from temporalio.client import Client
@@ -10,6 +8,8 @@ from temporalio.contrib.pydantic import pydantic_data_converter
 from kin.orchestrator.executor.dag_workflow import KinDAGWorkflow
 from kin.models.schemas import DAGSpec, TaskNode, TaskResult
 from kin.orchestrator.planner import Planner
+
+load_dotenv()
 
 app = FastAPI(title="Kin AI Gateway")
 
@@ -21,7 +21,9 @@ class WorkflowRequest(BaseModel):
 @app.post("/v1/workflows")
 async def start_workflow(request: WorkflowRequest):
     try:
-        client = await Client.connect("localhost:7233", data_converter=pydantic_data_converter)
+        client = await Client.connect(
+            "localhost:7233", data_converter=pydantic_data_converter
+        )
 
         # NEW: use planner
         planner = Planner(api_key=os.getenv("GROQ_API_KEY"))
@@ -29,7 +31,7 @@ async def start_workflow(request: WorkflowRequest):
 
         dag_id = str(dag.workflow_id)
 
-        handle = await client.start_workflow(
+        await client.start_workflow(
             KinDAGWorkflow.run,
             dag,
             id=dag_id,
@@ -67,7 +69,9 @@ async def get_status(workflow_id: str):
 
             final_results[result.node_id] = {
                 "status": result.status,
-                "agent_type": result.output.get("agent_type") if result.output else None,
+                "agent_type": (
+                    result.output.get("agent_type") if result.output else None
+                ),
                 "data": result.output,
                 "error": result.error,
             }

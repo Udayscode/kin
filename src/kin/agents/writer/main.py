@@ -47,7 +47,11 @@ class WriterAgent(BaseAgent):
             }
         except Exception as e:
             print(f"Writer Gemini Error: {e}")
-            return {"agent_type": "writer", "markdown": f"Error: {str(e)}", "status": "failed"}
+            return {
+                "agent_type": "writer",
+                "markdown": f"Error: {str(e)}",
+                "status": "failed",
+            }
 
 
 if __name__ == "__main__":
