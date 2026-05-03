@@ -33,13 +33,9 @@ class ResearcherAgent(BaseAgent):
     async def process(self, task: TaskMessage) -> dict:
         print(f"[*] RESEARCHER: Processing task -> {task.task_description[:50]}...")
 
-        # 1. Action: Search the web for real-time data
-        queries = [
-            "silicon wafer shipment growth 2026",
-            "AI chip demand statistics 2026",
-            "memory price forecast Q3 2026 semiconductor",
-        ]
-        search_data = "\n\n".join(web_search(q) for q in queries)
+        # Use task description as the search query (first 120 chars as a focused query)
+        search_query = task.task_description[:120].strip()
+        search_data = web_search(search_query, max_results=5)
         print(f"[DEBUG] DDG returned {len(search_data)} chars")
 
         system_prompt = (
@@ -48,18 +44,23 @@ class ResearcherAgent(BaseAgent):
         )
 
         try:
-            # 2. Reasoning: Synthesis via Gemini
-            prompt = f"{system_prompt}\n\nTASK: {task.task_description}\n\nSEARCH DATA:\n{search_data}"
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt},
+                    {
+                        "role": "user",
+                        "content": (
+                            f"TASK: {task.task_description}\n\n"
+                            f"SEARCH DATA:\n{search_data or 'No search results available.'}"
+                        ),
+                    },
                 ],
             )
 
             return {
+                "agent_type": "researcher",
                 "data": {
                     "research_content": response.choices[0].message.content,
                     "sources": ["DuckDuckGo Live Search", "Groq AI"],
@@ -72,6 +73,7 @@ class ResearcherAgent(BaseAgent):
                 raise  # let Temporal retry after backoff
             # only fallback for non-quota errors
             return {
+                "agent_type": "researcher",
                 "data": {"research_content": search_data, "sources": ["DuckDuckGo"]},
                 "status": "partial_success",
             }

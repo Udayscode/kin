@@ -1,11 +1,17 @@
 import asyncio
 
+from dotenv import load_dotenv
 from temporalio.client import Client
-from temporalio.worker import Worker
 from temporalio.contrib.pydantic import pydantic_data_converter
+from temporalio.worker import Worker
 
-from kin.orchestrator.executor.dag_workflow import KinDAGWorkflow
+from kin.observability.logging import get_logger, setup_logging
 from kin.orchestrator.executor.activities import AgentActivities
+from kin.orchestrator.executor.dag_workflow import KinDAGWorkflow
+
+load_dotenv()
+setup_logging()
+log = get_logger("kin.worker")
 
 
 async def main():
@@ -26,7 +32,7 @@ async def main():
         ],
     )
 
-    print("Worker started...")
+    log.info("Temporal worker started on queue 'kin-task-queue'")
     await worker.run()
 
 

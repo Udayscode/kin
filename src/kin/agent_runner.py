@@ -31,14 +31,32 @@ async def run_agent():
                 if task_data.agent_type == agent.agent_type:
                     print(f"Processing task: {task_data.msg_id}")
 
-                    result_data = await agent.process(task_data)
-
-                    res = TaskResult(
-                        workflow_id=task_data.workflow_id,
-                        node_id=task_data.node_id,
-                        status="COMPLETED",
-                        output=result_data.get("data", result_data),
+                    # publish RUNNING so CLI shows it immediately
+                    await r.xadd(
+                        f"results:{task_data.workflow_id}",
+                        {
+                            "data": TaskResult(
+                                node_id=task_data.node_id,
+                                status="RUNNING",
+                                output={"agent_type": agent.agent_type},
+                            ).model_dump_json()
+                        },
                     )
+
+                    try:
+                        result_data = await agent.process(task_data)
+                        res = TaskResult(
+                            node_id=task_data.node_id,
+                            status="COMPLETED",
+                            output=result_data,
+                        )
+                    except Exception as e:
+                        res = TaskResult(
+                            node_id=task_data.node_id,
+                            status="FAILED",
+                            error=str(e),
+                            output={"agent_type": agent.agent_type},
+                        )
 
                     await r.xadd(
                         f"results:{task_data.workflow_id}",

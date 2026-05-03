@@ -42,12 +42,21 @@ class KinDAGWorkflow:
             for nid in ready:
                 node = node_map[nid]
                 if node.input_from:
-                    context = "\n".join(
-                        f"--- Output from {dep} ---\n{str(results.get(dep, ''))}"
-                        for dep in node.input_from
-                    )
+                    parts = []
+                    for dep in node.input_from:
+                        dep_result = results.get(dep, {})
+                        if isinstance(dep_result, dict):
+                            content = (
+                                dep_result.get("data", {}).get("research_content")
+                                or dep_result.get("markdown")
+                                or dep_result.get("research_content")
+                                or str(dep_result)
+                            )
+                        else:
+                            content = str(dep_result)
+                        parts.append("--- Research from " + dep + " ---\n" + content)
                     node.task_description += (
-                        f"\n\nCONTEXT FROM PREVIOUS STEPS:\n{context}"
+                        "\n\nCONTEXT FROM PREVIOUS RESEARCH:\n" + "\n\n".join(parts)
                     )
 
             # dispatch ready nodes in parallel
@@ -56,7 +65,11 @@ class KinDAGWorkflow:
                     "dispatch_task",
                     args=[node_map[nid], str(dag.workflow_id)],
                     start_to_close_timeout=timedelta(seconds=node_map[nid].timeout_sec),
-                    retry_policy=RetryPolicy(maximum_attempts=1),
+                    retry_policy=RetryPolicy(
+                        maximum_attempts=3,
+                        initial_interval=timedelta(seconds=30),
+                        maximum_interval=timedelta(minutes=3),
+                    ),
                 )
                 for nid in ready
             ]

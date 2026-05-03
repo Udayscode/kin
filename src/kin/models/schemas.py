@@ -17,7 +17,7 @@ class TaskNode(BaseModel):
     task_description: str
     input_from: List[str] = []
     dependencies: list[str] = []
-    timeout_sec: int = 120
+    timeout_sec: int = 600
     max_retries: int = 2
 
 

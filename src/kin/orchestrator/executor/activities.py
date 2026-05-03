@@ -88,12 +88,13 @@ class AgentActivities:
                             if result.node_id == node.id:
                                 if result.status == "FAILED":
                                     raise Exception(result.error)
-
-                                return {
-                                    "node_id": node.id,
-                                    "agent_type": node.agent_type,
-                                    "data": result.output,
-                                }
+                                if result.status == "COMPLETED":
+                                    return {
+                                        "node_id": node.id,
+                                        "agent_type": node.agent_type,
+                                        "data": result.output,
+                                    }
+                                # RUNNING — keep polling
 
             except asyncio.CancelledError:
                 activity.logger.warning(
