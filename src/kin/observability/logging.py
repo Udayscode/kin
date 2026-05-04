@@ -20,7 +20,7 @@ def setup_logging(level: str = "INFO") -> None:
     root.setLevel(getattr(logging, level.upper(), logging.INFO))
 
     # suppress noisy third-party loggers
-    for noisy in ("httpx", "httpcore", "temporalio", "uvicorn.access"):
+    for noisy in ("httpx", "httpcore", "temporalio", "uvicorn.access", "ddgs", "primp"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
 

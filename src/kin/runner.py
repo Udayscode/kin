@@ -1,11 +1,6 @@
 """
-Generic agent runner — replaces agent_runner.py and writer_runner.py.
-
-Usage:
-    uv run python -m kin.runner researcher
-    uv run python -m kin.runner writer
+Generic agent runner
 """
-
 import asyncio
 import os
 import sys

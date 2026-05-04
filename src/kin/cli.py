@@ -106,6 +106,21 @@ def poll(workflow_id: str):
                                 padding=(1, 2),
                             )
                         )
+                        
+                        total_prompt = 0
+                        total_comp = 0
+                        total_tokens = 0
+                        for node_data in results.values():
+                            out_data = node_data.get("data") or {}
+                            if isinstance(out_data, dict):
+                                usage = out_data.get("usage") or {}
+                                total_prompt += usage.get("prompt_tokens", 0)
+                                total_comp += usage.get("completion_tokens", 0)
+                                total_tokens += usage.get("total_tokens", 0)
+                        
+                        if total_tokens > 0:
+                            console.print(f"\n[dim]Token Usage | Prompt: {total_prompt} | Completion: {total_comp} | Total: {total_tokens}[/dim]\n")
+                            
                     else:
                         console.print(
                             "[yellow]WARNING[/yellow] | No markdown content found in writer output."

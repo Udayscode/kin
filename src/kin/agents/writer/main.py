@@ -43,10 +43,16 @@ class WriterAgent(BaseAgent):
                 "agent_type": "writer",
                 "output_file": "report.md",
                 "markdown": response.choices[0].message.content,
+                "usage": {
+                    "prompt_tokens": response.usage.prompt_tokens,
+                    "completion_tokens": response.usage.completion_tokens,
+                    "total_tokens": response.usage.total_tokens,
+                } if getattr(response, "usage", None) else None,
                 "status": "success",
             }
         except Exception as e:
-            print(f"Writer Gemini Error: {e}")
+            if "429" in str(e) or "rate_limit" in str(e).lower() or "quota" in str(e).lower():
+                raise  # let Temporal retry after backoff
             return {
                 "agent_type": "writer",
                 "markdown": f"Error: {str(e)}",
