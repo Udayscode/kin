@@ -195,6 +195,7 @@ cp .env.example .env
 uv run kin submit "Research the impact of TSMC's Arizona fabs on US semiconductor sovereignty"
 
 ```
+```
 INFO | Workflow Created: 56e3d11c-53dd-4b53-a8d4-82a7066bd716
  RUNNING WORKFLOW: 56e3d11c-53dd-4b53-a8d4-82a7066bd716  
 ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
@@ -209,6 +210,7 @@ INFO | Workflow Created: 56e3d11c-53dd-4b53-a8d4-82a7066bd716
 ✓ Complete — report generated.
 Token Usage | Prompt: 5867 | Completion: 3878 | Total: 9745
 ```
+<img width="1657" height="942" alt="image" src="https://github.com/user-attachments/assets/5e9a89b0-6144-4724-a069-0c655928f789" />
 
 ---
 
