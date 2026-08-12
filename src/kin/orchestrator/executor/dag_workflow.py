@@ -1,6 +1,7 @@
 import asyncio
 from datetime import timedelta
 from temporalio import workflow
+import temporalio.exceptions
 from temporalio.common import RetryPolicy
 from kin.models.schemas import DAGSpec, NodeState
 
@@ -30,7 +31,7 @@ class KinDAGWorkflow:
                     break
                 if any(s == NodeState.FAILED for s in state.values()):
                     failed = [nid for nid, s in state.items() if s == NodeState.FAILED]
-                    raise Exception(f"Nodes failed: {failed}")
+                    raise temporalio.exceptions.ApplicationError(f"Nodes failed: {failed}")
                 # nothing ready but not done — shouldn't happen if DAG is valid
                 break
 

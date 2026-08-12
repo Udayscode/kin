@@ -62,12 +62,5 @@ class WriterAgent(BaseAgent):
 
 if __name__ == "__main__":
     load_dotenv()
-    # Testing logic
     agent = WriterAgent(api_key=os.getenv("GROQ_API_KEY"))
-    mock_task = TaskMessage(
-        workflow_id="test",
-        node_id="writer-node",
-        agent_type="writer",
-        task_description="Research: AI is cool. Source: internet. Content: it helps code.",
-    )
     asyncio.run(agent.start())

@@ -15,6 +15,11 @@ kin.egg-info/
 *.db
 versions/
 
+# Logs
+logs/
+*.log
+*.pid
+
 # IDEs
 .vscode/
-.idea/
+.idea/*.log

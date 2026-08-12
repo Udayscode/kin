@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import json
 from abc import ABC, abstractmethod
 from kin.models.schemas import TaskMessage, TaskResult, NodeState
 from kin.bus.streams import KinBus
@@ -58,6 +59,7 @@ class BaseAgent(ABC):
         async with self.semaphore:
             try:
                 task = TaskMessage.model_validate_json(data["data"])
+                workflow_id = task.workflow_id
                 output = await self.process(task)
 
                 result = TaskResult(
@@ -65,6 +67,7 @@ class BaseAgent(ABC):
                 )
             except Exception as e:
                 logger.error(f"Execution failed for node {data.get('node_id')}: {e}")
+                workflow_id = json.loads(data.get("data", "{}")).get("workflow_id", "unknown")
                 result = TaskResult(
                     node_id=data.get("node_id", "unknown"),
                     status=NodeState.FAILED,
@@ -72,5 +75,5 @@ class BaseAgent(ABC):
                 )
 
             # Sequence: 1. Send Result -> 2. ACK message
-            await self.bus.send_result(result, result.node_id)
+            await self.bus.send_result(result, workflow_id)
             await self.bus.client.xack(f"tasks:{self.agent_type}", self.group, msg_id)

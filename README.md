@@ -181,30 +181,33 @@ class TaskResult(BaseModel):
 **Prerequisites:** Python 3.12+, Node 18+, Redis, Temporal server
 
 ```bash
-# 1. Start infrastructure (Redis, Temporal, Postgres)
-cd infra/docker
-docker compose up -d
+# 1. Install dependencies
+uv sync
 
-# 2. Install Python deps
-cd ~/projects/kin
-uv sync   # or: pip install -e .
-
-# 3. Environment
+# 2. Configure Environment
 cp .env.example .env
-# set GROQ_API_KEY in .env
+# Add your GROQ_API_KEY to .env
 
-# 4. Start the Temporal worker
-python -m kin.orchestrator.executor.worker
+# 3. Start everything
+./start.sh
 
-# 5. Start agents (each in a separate terminal)
-python -m kin.agents.researcher.main
-python -m kin.agents.writer.main
+# 4. Submit a workflow
+uv run kin submit "Research the impact of TSMC's Arizona fabs on US semiconductor sovereignty"
 
-# 6. Start the gateway
-uvicorn kin.gateway.main:app --host 0.0.0.0 --port 8000
+```
+INFO | Workflow Created: 56e3d11c-53dd-4b53-a8d4-82a7066bd716
+ RUNNING WORKFLOW: 56e3d11c-53dd-4b53-a8d4-82a7066bd716  
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ NODE_ID              ┃ AGENT           ┃ STATUS       ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ n1                   │ researcher      │ COMPLETED    │
+│ n2                   │ researcher      │ COMPLETED    │
+│ n3                   │ researcher      │ COMPLETED    │
+│ n4                   │ writer          │ COMPLETED    │
+└──────────────────────┴─────────────────┴──────────────┘
 
-# 7. Submit a workflow
-kin submit "Research the impact of TSMC's Arizona fabs on US semiconductor sovereignty"
+✓ Complete — report generated.
+Token Usage | Prompt: 5867 | Completion: 3878 | Total: 9745
 ```
 
 ---

@@ -14,5 +14,7 @@ services:
   temporal:
     container_name: temporal
     image: temporalio/admin-tools:latest
-    network_mode: host
+    ports:
+      - "7233:7233"
+      - "8233:8233"
     entrypoint: ["/bin/sh", "-c", "temporal server start-dev --ip 0.0.0.0"]
